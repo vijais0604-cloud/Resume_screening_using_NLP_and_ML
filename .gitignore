@@ -4,3 +4,7 @@
 *.png
 *.venv
 *.aider
+*.resume
+.vscode/
+__pycache__/
+*.ipynb
