@@ -10,4 +10,6 @@ __pycache__/
 *.ipynb_checkpoints
 *data/*
 *.pkl
-*mlflow*
+*mlflow.db
+*.aider*
+*mlruns/*
