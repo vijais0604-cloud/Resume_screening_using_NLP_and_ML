@@ -14,7 +14,7 @@ import mlflow.sklearn
 
 df = pd.read_csv("data/embbeded_data.csv")
 
-global_db = "sqlite:///Users/vijais/ml_history/mlflow.db"
+global_db = "sqlite:///mlflow.db"
 
 
 def prepare_training_data(df, target_column='matched_score', test_size=0.2, random_state=42):
