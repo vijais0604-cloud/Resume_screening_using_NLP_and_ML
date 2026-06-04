@@ -54,14 +54,15 @@ def predict_ats_score(
             job_text
         )
     )
+    embedding = np.concatenate([
+        resume_embedding,
+        job_embedding
+    ])
 
     features = np.concatenate([
-
-        resume_embedding,
-
-        job_embedding,
-
         [skill_score],
+
+        embedding,
 
         [semantic_score],
 
