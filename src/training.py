@@ -11,7 +11,7 @@ from sklearn.model_selection import RandomizedSearchCV, train_test_split
 from xgboost import XGBRegressor
 
 
-DATA_PATH = Path("data/embbeded_data.csv")
+DATA_PATH = Path("data/embedded_data.csv")
 MODELS_DIR = Path("models")
 RESULTS_CSV = MODELS_DIR / "xgboost_hyperparameter_results.csv"
 BEST_MODEL_PATH = MODELS_DIR / "best_xgboost_model.pkl"

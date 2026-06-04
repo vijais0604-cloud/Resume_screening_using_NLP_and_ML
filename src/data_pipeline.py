@@ -4,12 +4,17 @@ import re
 from sklearn.metrics.pairwise import cosine_similarity
 from sentence_transformers import SentenceTransformer
 import joblib
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_absolute_error,mean_squared_error, r2_score
+import json
+import os
+
+if os.path.exists("src/skills.json"):
+    with open("src/skills.json", "r") as f:
+        SKILLS = set(json.load(f))
 
 #Loading the dataset
 dataset = pd.read_csv("data/resume_data.csv")
+
+all_text = pd.DataFrame()
 
 #cleaning the column names
 dataset.columns = dataset.columns.str.strip()
@@ -34,10 +39,7 @@ drop_cols = [
 
 dataset = dataset.drop(columns=drop_cols)    
 
-
-
 target_col = dataset["matched_score"]
-
 
 dataset = dataset.fillna("")
 
@@ -65,6 +67,8 @@ dataset = dataset.apply(
 )
 
 dataset = dataset.replace(r"\bnone\b", "", regex=True)
+
+
 
 
 resume = dataset[['career_objective',
@@ -97,54 +101,75 @@ job = dataset[['job_position_name',
  'responsibilities',
  'skills_required']]
 
+
+
+
+
 resume["resume_text"] = resume.astype(str).agg(" ".join, axis=1)
 
 job["job_text"] = job.astype(str).agg(" ".join, axis=1)
 
+dataset["resume_text"] = resume["resume_text"]
+dataset["job_text"] = job["job_text"]
+
+
+
 
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
+joblib.dump(model, 'sentence_transformer_model.joblib')
 
 resume_embeddings =model.encode(resume["resume_text"].tolist())
-
 
 job_embeddings =model.encode(job["job_text"].tolist())
 
 
-resume_skills = resume["resume_text"].apply(lambda x: set(x.split()))
 
-job_skills = job["job_text"].apply(lambda x: set(x.split()))
+def extract_skills(text):
 
+    text = text.lower()
 
+    found_skills = set()
 
+    for skill in SKILLS:
 
+        pattern = r"\b" + re.escape(skill) + r"\b"
 
-skill_scores = []
+        if re.search(pattern, text):
 
-for i in range(len(dataset)):
+            found_skills.add(skill)
 
-    resume_skill_set = set(
-        str(resume_skills[i]).split()
+    return found_skills
+
+def calculate_skill_score(resume_text,job_text):
+
+    resume_skills = extract_skills(resume_text)
+
+    job_skills = extract_skills(job_text)
+
+    if len(job_skills) == 0:
+        return 0
+
+    matched = len(
+        resume_skills.intersection(
+            job_skills
+        )
     )
 
-    job_skill_set = set(
-        str(job_skills[i]).split()
-    )
+    score = (
+        matched / len(job_skills)
+    ) * 100
 
-    common_skills = resume_skill_set.intersection(
-        job_skill_set
-    )
+    return round(score,2)
 
-    if len(job_skill_set) > 0:
 
-        score = (
-            len(common_skills) / len(job_skill_set)
-        ) * 100
-
-    else:
-        score = 0
-
-    skill_scores.append(score)
+all_text["skill_score"] = dataset.apply(
+    lambda row: calculate_skill_score(
+        row["resume_text"],
+        row["job_text"]
+    ),
+    axis=1
+)
 
 
 embeddings = np.concatenate(
@@ -155,10 +180,8 @@ embeddings = np.concatenate(
 
 )
 
-all_text = pd.DataFrame()
 all_text["embeddings"] = embeddings.tolist()
 
-all_text['skill_score'] = skill_scores
 
 semantic_scores = []
 
@@ -177,44 +200,74 @@ all_text["semantic_score"] = semantic_scores
 
 
 
-experience_scores = []
+def extract_experience(text):
 
-for i in range(len(dataset)):
+    text = text.lower()
 
-    candidate_text = str(dataset["start_dates"][i])
+    patterns = [
 
-    required_text = str(dataset["experiencere_requirement"][i])
+        r"(\d+)\+?\s*years",
 
-    candidate_years = len(
-        re.findall(r"\b(19|20)\d{2}\b", candidate_text)
-    )
+        r"(\d+)\+?\s*yrs",
 
-    required_years = re.findall(r"\d+", required_text)
+        r"(\d+)\+?\s*year",
 
-    if len(required_years) > 0:
+        r"experience\s*:\s*(\d+)"
 
-        required_years = int(required_years[0])
+    ]
 
-    else:
-        required_years = 0
+    for pattern in patterns:
 
-    if required_years > 0:
+        match = re.search(
 
-        score = min(
-            (candidate_years / required_years) * 100,
-            100
+            pattern,
+
+            text
+
         )
 
-    else:
-        score = 0
+        if match:
 
-    experience_scores.append(score)
+            return int(
 
-all_text["experience_score"] = experience_scores
+                match.group(1)
 
+            )
 
+    return 0
+
+def calculate_experience_score(resume_text,job_text):
+
+    candidate_exp = extract_experience(resume_text)
+
+    required_exp = extract_experience(job_text)
+
+    if required_exp == 0:
+
+        return 100
+
+    score = min(
+
+        (candidate_exp / required_exp)
+
+        * 100,
+
+        100
+
+    )
+
+    return round(score,2)
+
+all_text["experience_score"] = dataset.apply(
+    lambda row: calculate_experience_score(
+        row["resume_text"],
+        row["job_text"]
+    ),
+    axis=1
+)
 
 all_text["matched_score"] = target_col.astype(float)
 
 
 
+all_text.to_csv("data/embedded_data.csv", index=False)

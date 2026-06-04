@@ -13,3 +13,4 @@ __pycache__/
 *mlflow.db
 *.aider*
 *mlruns/*
+*.joblib

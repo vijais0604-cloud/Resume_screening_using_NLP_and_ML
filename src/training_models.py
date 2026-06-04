@@ -12,7 +12,7 @@ import mlflow
 import mlflow.sklearn
     
 
-df = pd.read_csv("data/embbeded_data.csv")
+df = pd.read_csv("data/embedded_data.csv")
 
 global_db = "sqlite:///mlflow.db"
 
