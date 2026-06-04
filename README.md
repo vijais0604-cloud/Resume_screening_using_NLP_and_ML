@@ -59,6 +59,44 @@ python src/training.py
 - `models/xgboost_hyperparameter_results.csv` - grid search result summary
 - MLflow run logged to the tracking server defined in `src/training.py`
 
+## Backend deployment and serving
+
+This project includes a FastAPI backend in `app/main.py` that exposes a `/predict` endpoint for resume-to-job matching.
+
+### Start the backend server
+
+From the project root, activate the virtual environment and run:
+
+```bash
+source .resume/bin/activate
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+### Request format
+
+The backend expects a PDF resume upload plus a job description string:
+
+- `resume`: PDF file uploaded as form data
+- `job_description`: text field in the same form
+
+Example using `curl`:
+
+```bash
+curl -X POST "http://127.0.0.1:8000/predict" \
+  -F "resume=@/path/to/resume.pdf" \
+  -F "job_description=Hiring software engineer with Python and ML experience"
+```
+
+### Deployment notes
+
+- `app/predictor.py` loads `models/best_xgboost_model.pkl` and `models/sentence_transformer_model.joblib`
+- Ensure you run `uvicorn` from the project root so those relative paths resolve correctly
+- The prediction output includes:
+  - `ats_score`
+  - `skill_score`
+  - `semantic_score`
+  - `experience_score`
+
 ## Viewing MLflow logs
 
 By default this project uses a local SQLite MLflow store at `sqlite:///mlflow.db`.
