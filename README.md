@@ -44,6 +44,34 @@ pip install -r requirements.txt
 
 4. Ensure the `data/embbeded_data.csv` file is present and contains the expected features and `matched_score` target column.
 
+## Docker
+
+This repository includes a Dockerfile named `dockerfile` that builds a Python 3.11 image and starts the FastAPI backend on port `8000`.
+
+Build the Docker image from the project root:
+
+```bash
+docker build -t resume-screener -f dockerfile .
+```
+
+Run the backend container:
+
+```bash
+docker run --rm -p 8000:8000 resume-screener
+```
+
+If you want the running container to use model artifacts from the local repository path, mount `src/model`:
+
+```bash
+docker run --rm -p 8000:8000 -v "$(pwd)/src/model:/app/src/model" resume-screener
+```
+
+Then open the API at:
+
+```text
+http://localhost:8000/predict
+```
+
 ## Running hyperparameter tuning for XGBoost
 
 The tuning script performs randomized search over XGBoost hyperparameters, logs the best model to MLflow, and saves the tuning results to CSV.
