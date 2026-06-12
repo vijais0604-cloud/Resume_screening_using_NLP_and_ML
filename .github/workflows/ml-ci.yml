@@ -22,6 +22,8 @@ jobs:
       - name: Run Model Verification Tests
         run: |
           pytest src/test/
+        env:
+          PYTHONPATH: ${{ github.workspace }}  
   build-and-push-docker:
     runs-on: ubuntu-latest
     needs: verify-model
