@@ -14,7 +14,15 @@ xgb_model = joblib.load(
     "src/model/best_xgboost_model.pkl"
 )
 
-embedding_model = joblib.load("src/model/sentence_transformer_model.joblib")
+from sentence_transformers import SentenceTransformer
+
+embedding_model = SentenceTransformer(
+
+    "src/model/sentence_transformer_model",
+
+    device="cpu"
+
+)
 
 def predict_ats_score(
     resume_text,   

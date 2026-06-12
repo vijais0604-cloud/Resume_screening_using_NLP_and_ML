@@ -15,7 +15,10 @@ notebook/
 
 mlruns/
 models/
-*test/
+
+# Target test and training folders anywhere in the project tree
+**/test/
+**/training/
 
 *.csv
 *.xlsx
@@ -27,6 +30,5 @@ README.md
 
 .DS_Store
 
-*training/
-
+*.db
 dataset.py

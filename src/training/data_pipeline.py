@@ -3,12 +3,16 @@ import numpy as np
 import re
 from sklearn.metrics.pairwise import cosine_similarity
 from sentence_transformers import SentenceTransformer
-import joblib
 import json
 import os
+from pathlib import Path
 
-if os.path.exists("src/skills.json"):
-    with open("src/skills.json", "r") as f:
+MODEL_DIR = Path(__file__).resolve().parent.parent / "model" / "sentence_transformer_model"
+SKILLS_DIR = Path(__file__).resolve().parent.parent / "skills.json"
+
+
+if os.path.exists(SKILLS_DIR):
+    with open(SKILLS_DIR, "r") as f:
         SKILLS = set(json.load(f))
 
 #Loading the dataset
@@ -117,7 +121,7 @@ dataset["job_text"] = job["job_text"]
 
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
-joblib.dump(model, 'src/model/sentence_transformer_model.joblib')
+model.save(str(MODEL_DIR))
 
 resume_embeddings =model.encode(resume["resume_text"].tolist())
 

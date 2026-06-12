@@ -6,10 +6,10 @@
 *.aider
 *.resume
 .vscode/
-__pycache__/
+**__pycache__/
 *.ipynb_checkpoints
 *data/*
-*mlflow.db
+mlflow.db
 *.aider*
 *mlruns/*
 env/
