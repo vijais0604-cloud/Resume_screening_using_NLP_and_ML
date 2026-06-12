@@ -117,7 +117,7 @@ dataset["job_text"] = job["job_text"]
 
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
-joblib.dump(model, 'models/sentence_transformer_model.joblib')
+joblib.dump(model, 'src/model/sentence_transformer_model.joblib')
 
 resume_embeddings =model.encode(resume["resume_text"].tolist())
 

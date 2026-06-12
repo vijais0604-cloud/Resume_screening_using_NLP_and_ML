@@ -12,7 +12,7 @@ from xgboost import XGBRegressor
 
 
 DATA_PATH = Path("data/embedded_data.csv")
-MODELS_DIR = Path("models")
+MODELS_DIR = Path("src/model")
 RESULTS_CSV = MODELS_DIR / "xgboost_hyperparameter_results.csv"
 BEST_MODEL_PATH = MODELS_DIR / "best_xgboost_model.pkl"
 MLFLOW_TRACKING_URI = "sqlite:///mlflow.db"

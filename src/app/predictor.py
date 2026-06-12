@@ -17,7 +17,7 @@ xgb_model = joblib.load(
 embedding_model = joblib.load("src/model/sentence_transformer_model.joblib")
 
 def predict_ats_score(
-    resume_text,
+    resume_text,   
     job_text
 ):
 
