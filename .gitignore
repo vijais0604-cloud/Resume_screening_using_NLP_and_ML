@@ -14,3 +14,4 @@ __pycache__/
 *mlruns/*
 env/
 models/
+*.joblib
